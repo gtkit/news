@@ -1,3 +1,3 @@
-module gitlab.superjq.com/go-tools/news
+module github.com/gtkit/news
 
 go 1.17
