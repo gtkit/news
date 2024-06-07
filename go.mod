@@ -1,3 +1,3 @@
 module github.com/gtkit/news
 
-go 1.17
+go 1.22
