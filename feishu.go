@@ -8,8 +8,9 @@ import (
 )
 
 type News interface {
-	Text(msg string)
-	RichText(...string)
+	text(string)
+	richText(string, string)
+	Send(...string)
 }
 
 type FsNews struct {
@@ -31,7 +32,28 @@ type fsInfo struct {
 	Content map[string]any `json:"content"`
 }
 
-func (f *FsNews) Text(msg string) {
+func (f *FsNews) Send(args ...string) {
+	switch len(args) {
+	case 0:
+		log.Printf("rich text args length zero, args:%v\n", args)
+		return
+	case 1:
+		f.text(args[0])
+		return
+	case 2:
+		f.richText(args[0], args[1])
+		return
+	default:
+		f.richText(args[0], args[1])
+		return
+	}
+}
+
+func (f *FsNews) text(msg string) {
+	if msg == "" {
+		log.Printf("FsNews text msg empty, msg:%v\n", msg)
+		return
+	}
 	info := &fsInfo{
 		MsgType: "text",
 		Content: map[string]any{
@@ -42,20 +64,11 @@ func (f *FsNews) Text(msg string) {
 	return
 }
 
-func (f *FsNews) RichText(args ...string) {
-	var title, msg string
-	switch len(args) {
-	case 0:
-		log.Printf("rich text args length zero, args:%v\n", args)
+func (f *FsNews) richText(title, msg string) {
+	if msg == "" {
+		log.Printf("FsNews rich text msg empty, msg:%v\n", msg)
 		return
-	case 1:
-		msg = args[0]
-	case 2:
-		title, msg = args[0], args[1]
-	default:
-		title, msg = args[0], args[1]
 	}
-
 	info := &fsInfo{
 		MsgType: "post",
 		Content: map[string]any{
@@ -84,6 +97,7 @@ func (f *FsNews) RichText(args ...string) {
 		},
 	}
 	sendFsNews(f.fsUrl, info)
+	return
 }
 
 func sendFsNews(fsUrl string, info *fsInfo) {
