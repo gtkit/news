@@ -9,7 +9,7 @@ import (
 
 type News interface {
 	Text(msg string)
-	RichText(title, msg string)
+	RichText(...string)
 }
 
 type FsNews struct {
@@ -51,7 +51,20 @@ func (f *FsNews) Text(msg string) {
 	_ = resp.Body.Close()
 }
 
-func (f *FsNews) RichText(title, msg string) {
+func (f *FsNews) RichText(args ...string) {
+	var title, msg string
+	switch len(args) {
+	case 0:
+		log.Printf("rich text args length zero, args:%v\n", args)
+		return
+	case 1:
+		msg = args[0]
+	case 2:
+		title, msg = args[0], args[1]
+	default:
+		title, msg = args[0], args[1]
+	}
+
 	info := &fsInfo{
 		MsgType: "post",
 		Content: map[string]any{
