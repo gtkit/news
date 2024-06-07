@@ -32,23 +32,14 @@ type fsInfo struct {
 }
 
 func (f *FsNews) Text(msg string) {
-	contentType := "application/json"
 	info := &fsInfo{
 		MsgType: "text",
 		Content: map[string]any{
 			"text": msg,
 		},
 	}
-
-	data, _ := json.Marshal(info)
-
-	resp, err := http.Post(f.fsUrl, contentType, strings.NewReader(string(data)))
-	if err != nil {
-		log.Printf("post failed, err:%v\n", err)
-		return
-	}
-
-	_ = resp.Body.Close()
+	sendFsNews(f.fsUrl, info)
+	return
 }
 
 func (f *FsNews) RichText(args ...string) {
@@ -92,11 +83,19 @@ func (f *FsNews) RichText(args ...string) {
 			},
 		},
 	}
-	data, _ := json.Marshal(info)
+	sendFsNews(f.fsUrl, info)
+}
 
-	resp, err := http.Post(f.fsUrl, "application/json", strings.NewReader(string(data)))
+func sendFsNews(fsUrl string, info *fsInfo) {
+	data, err := json.Marshal(info)
 	if err != nil {
-		log.Printf("post failed, err:%v\n", err)
+		log.Printf("sendFsNews marshal failed, err:%v\n", err)
+		return
+	}
+
+	resp, err := http.Post(fsUrl, "application/json", strings.NewReader(string(data)))
+	if err != nil {
+		log.Printf("sendFsNews post failed, err:%v\n", err)
 		return
 	}
 
