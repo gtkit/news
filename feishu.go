@@ -17,11 +17,16 @@ type FsNews struct {
 	fsUrl string
 }
 
+// 检查接口实现
 func _() {
 	var _ News = (*FsNews)(nil)
 }
 
 func FsNew(fsUrl string) News {
+	if fsUrl == "" {
+		log.Printf("FsNew fsUrl empty, fsUrl:%v\n", fsUrl)
+		return nil
+	}
 	return &FsNews{
 		fsUrl: fsUrl,
 	}
