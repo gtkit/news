@@ -42,10 +42,12 @@ func NewInternalApp(ctx context.Context, appID, appSecret string) (*InternalApp,
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
+	// fmt.Printf("InternalApp: %+v\n", result)
 
 	return &InternalApp{
 		AppAccessToken:    result.AppAccessToken,
 		TenantAccessToken: result.TenantAccessToken,
+		Expire:            result.Expire,
 	}, nil
 }
 

@@ -4,6 +4,7 @@ package news
 type InternalApp struct {
 	AppAccessToken    string `json:"app_access_token"`
 	TenantAccessToken string `json:"tenant_access_token"`
+	Expire            int    `json:"expire"`
 }
 
 // 自建应用 AccessToken 响应结构体

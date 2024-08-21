@@ -13,7 +13,7 @@ import (
 
 var (
 	appID     = "xxx"
-	appSecret = "xxxx"
+	appSecret = "xxx"
 	srcimg    = "/xxx/800000797.jpg"
 	dstpath   = "/xxx/"
 )
@@ -26,7 +26,8 @@ func TestFsWarnText(t *testing.T) {
 
 func TestAccessToken(t *testing.T) {
 	// NewApp("cli_9f3dd38ac5bbd00e", "WaVHcgdg2n9slTh5y7AutbNqBogZhdWJ")
-	news.NewInternalApp(context.Background(), appID, appSecret)
+	app, _ := news.NewInternalApp(context.Background(), appID, appSecret)
+	t.Logf("app: %+v", app)
 	// tenantAccessToken := app.TenantAccessToken()
 	// t.Log("tenantAccessToken: ", tenantAccessToken)
 }
