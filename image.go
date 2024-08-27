@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/gtkit/json"
+	"github.com/pkg/errors"
 )
 
 type UploadImageResp struct {
@@ -17,7 +18,9 @@ type UploadImageResp struct {
 	Data struct {
 		ImageKey string `json:"image_key"`
 	} `json:"data"`
-	Msg string `json:"msg"`
+	Msg   string `json:"msg"`
+	Error any    `json:"error"`
+	Helps any    `json:"helps"`
 }
 
 func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImageResp, error) {
@@ -60,6 +63,11 @@ func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImag
 	var uploadResp UploadImageResp
 	if err := json.NewDecoder(resp.Body).Decode(&uploadResp); err != nil {
 		return nil, err
+	}
+
+	if uploadResp.Code != 0 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, errors.New(string(body))
 	}
 	return &uploadResp, nil
 }
