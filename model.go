@@ -51,3 +51,23 @@ type ImageMessageResp struct {
 		} `json:"body"`
 	} `json:"data"`
 }
+
+type UploadImageResp struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Data struct {
+		ImageKey string `json:"image_key"`
+	} `json:"data"`
+	Error struct {
+		Message              string `json:"message"`
+		LogID                string `json:"log_id"`
+		PermissionViolations []struct {
+			Type    string `json:"type"`
+			Subject string `json:"subject"`
+		} `json:"permission_violations"`
+		Helps []struct {
+			URL         string `json:"url"`
+			Description string `json:"description"`
+		} `json:"helps"`
+	} `json:"error,omitempty"`
+}

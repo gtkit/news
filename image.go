@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -12,16 +13,6 @@ import (
 	"github.com/gtkit/json"
 	"github.com/pkg/errors"
 )
-
-type UploadImageResp struct {
-	Code int `json:"code"`
-	Data struct {
-		ImageKey string `json:"image_key"`
-	} `json:"data"`
-	Msg   string `json:"msg"`
-	Error any    `json:"error"`
-	Helps any    `json:"helps"`
-}
 
 func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImageResp, error) {
 	api := "https://open.feishu.cn/open-apis/im/v1/images"
@@ -54,6 +45,9 @@ func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImag
 
 	resp, err := client.Do(req)
 	if err != nil {
+		body, _ := io.ReadAll(resp.Body)
+		log.Print("Error in UploadImage Request: ", err)
+		log.Print("Error in UploadImage Response: ", string(body))
 		return nil, err
 	}
 	defer func() {
@@ -62,12 +56,13 @@ func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImag
 
 	var uploadResp UploadImageResp
 	if err := json.NewDecoder(resp.Body).Decode(&uploadResp); err != nil {
+		log.Print("Error in UploadImage Response: ", err)
 		return nil, err
 	}
 
 	if uploadResp.Code != 0 {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, errors.New(string(body))
+		log.Print("Error in UploadImage Response: ", uploadResp.Msg)
+		return nil, errors.New(uploadResp.Msg)
 	}
 	return &uploadResp, nil
 }
