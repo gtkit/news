@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gtkit/json"
 	"github.com/pkg/errors"
@@ -45,10 +45,7 @@ func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImag
 
 	resp, err := client.Do(req)
 	if err != nil {
-		body, _ := io.ReadAll(resp.Body)
-		log.Print("Error in UploadImage Request: ", err)
-		log.Print("Error in UploadImage Response: ", string(body))
-		return nil, err
+		return nil, errors.WithMessage(errors.WithStack(err), err.Error())
 	}
 	defer func() {
 		_ = resp.Body.Close()
@@ -56,13 +53,12 @@ func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImag
 
 	var uploadResp UploadImageResp
 	if err := json.NewDecoder(resp.Body).Decode(&uploadResp); err != nil {
-		log.Print("Error in UploadImage Response: ", err)
-		return nil, err
+		return nil, errors.WithMessage(err, "decode upload image response failed")
 	}
 
 	if uploadResp.Code != 0 {
-		log.Print("Error in UploadImage Response: ", uploadResp.Msg)
-		return nil, errors.New(uploadResp.Msg)
+		errmsg := "upload image failed, code: " + strconv.Itoa(uploadResp.Code) + ", msg: " + uploadResp.Msg
+		return nil, errors.New(errmsg)
 	}
 	return &uploadResp, nil
 }
