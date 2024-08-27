@@ -57,7 +57,8 @@ func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImag
 	}
 
 	if uploadResp.Code != 0 {
-		errmsg := "upload image failed, code: " + strconv.Itoa(uploadResp.Code) + ", msg: " + uploadResp.Msg
+		uperr, _ := json.Marshal(uploadResp.Error)
+		errmsg := "upload image failed, code: " + strconv.Itoa(uploadResp.Code) + ", msg: " + uploadResp.Msg + ", error: " + string(uperr)
 		return nil, errors.New(errmsg)
 	}
 	return &uploadResp, nil
