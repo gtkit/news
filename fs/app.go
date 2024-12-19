@@ -1,4 +1,4 @@
-package news
+package fs
 
 import (
 	"bytes"
@@ -6,12 +6,16 @@ import (
 	"net/http"
 
 	"github.com/gtkit/json"
+
+	"github.com/gtkit/news"
+)
+
+const (
+	AccessTokenApi = "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal"
 )
 
 // InternalApp 内部应用, 用于获取内部应用的 access token
-func NewInternalApp(ctx context.Context, appID, appSecret string) (*InternalApp, error) {
-	api := "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal"
-
+func NewInternalApp(ctx context.Context, appID, appSecret string) (news.AppNewsInterface, error) {
 	app := struct {
 		AppID     string `json:"app_id"`
 		AppSecret string `json:"app_secret"`
@@ -24,7 +28,7 @@ func NewInternalApp(ctx context.Context, appID, appSecret string) (*InternalApp,
 	body, _ := json.Marshal(app)
 
 	client := &http.Client{}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, api, bytes.NewBuffer(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, AccessTokenApi, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +46,6 @@ func NewInternalApp(ctx context.Context, appID, appSecret string) (*InternalApp,
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
-	// fmt.Printf("InternalApp: %+v\n", result)
 
 	return &InternalApp{
 		AppAccessToken:    result.AppAccessToken,
@@ -57,4 +60,8 @@ func (a *InternalApp) authTenantToken() string {
 
 func (a *InternalApp) authAppToken() string {
 	return "Bearer " + a.AppAccessToken
+}
+
+func (a *InternalApp) Expired() int {
+	return a.Expire
 }

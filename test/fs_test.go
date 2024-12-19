@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/gtkit/news"
+	"github.com/gtkit/news/fs"
 )
 
 var (
@@ -19,14 +19,15 @@ var (
 )
 
 func TestFsWarnText(t *testing.T) {
-	fsurl := "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
-	news.FsNew(fsurl).Send("我的标题1")
-	news.FsNew(fsurl).Send("我的标题2", "我的内容")
+	// fsurl := "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
+	fsurl := "https://open.feishu.cn/open-apis/bot/v2/hook/92d3b20a-4660-472e-ab43-e280150c345e"
+	fs.NewWebHook(fsurl).Send("我的标题1")
+	fs.NewWebHook(fsurl).Send("我的标题2", "我的内容")
 }
 
 func TestAccessToken(t *testing.T) {
 	// NewApp("cli_9f3dd38ac5bbd00e", "WaVHcgdg2n9slTh5y7AutbNqBogZhdWJ")
-	app, _ := news.NewInternalApp(context.Background(), appID, appSecret)
+	app, _ := fs.NewInternalApp(context.Background(), appID, appSecret)
 	t.Logf("app: %+v", app)
 	// tenantAccessToken := app.TenantAccessToken()
 	// t.Log("tenantAccessToken: ", tenantAccessToken)
@@ -36,7 +37,7 @@ func TestUploadImage(t *testing.T) {
 
 	ctx := context.Background()
 
-	app, err := news.NewInternalApp(ctx, appID, appSecret)
+	app, err := fs.NewInternalApp(ctx, appID, appSecret)
 	if err != nil {
 		t.Error("NewInternalApp error: ", err)
 	}
@@ -52,7 +53,7 @@ func TestUploadImage(t *testing.T) {
 
 func TestSendImageMsg(t *testing.T) {
 	ctx := context.Background()
-	app, err := news.NewInternalApp(ctx, appID, appSecret)
+	app, err := fs.NewInternalApp(ctx, appID, appSecret)
 	if err != nil {
 		t.Error("NewInternalApp error: ", err)
 	}
@@ -63,7 +64,7 @@ func TestSendImageMsg(t *testing.T) {
 	}
 	t.Logf("res: %+v", img)
 
-	if err := app.SendImageMessage(ctx, "ou_1e3fc242928fa853dd2ed13b1db60bd3", img.Data.ImageKey); err != nil {
+	if err := app.SendImageMsg(ctx, "ou_1e3fc242928fa853dd2ed13b1db60bd3", img.Data.ImageKey); err != nil {
 		t.Error("SendImageMessage error: ", err)
 		return
 	}

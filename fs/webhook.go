@@ -1,28 +1,19 @@
-package news
+package fs
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
-)
 
-type News interface {
-	text(string)
-	richText(string, string)
-	Send(...string)
-}
+	"github.com/gtkit/news"
+)
 
 type FsNews struct {
 	fsUrl string
 }
 
-// 检查接口实现
-func _() {
-	var _ News = (*FsNews)(nil)
-}
-
-func FsNew(fsUrl string) News {
+func NewWebHook(fsUrl string) news.WebHookNewsInterface {
 	if fsUrl == "" {
 		log.Printf("FsNew fsUrl empty, fsUrl:%v\n", fsUrl)
 		return nil
@@ -43,18 +34,18 @@ func (f *FsNews) Send(args ...string) {
 		log.Printf("rich text args length zero, args:%v\n", args)
 		return
 	case 1:
-		f.text(args[0])
+		text(f.fsUrl, args[0])
 		return
 	case 2:
-		f.richText(args[0], args[1])
+		richText(f.fsUrl, args[0], args[1])
 		return
 	default:
-		f.richText(args[0], args[1])
+		richText(f.fsUrl, args[0], args[1])
 		return
 	}
 }
 
-func (f *FsNews) text(msg string) {
+func text(url, msg string) {
 	if msg == "" {
 		log.Printf("FsNews text msg empty, msg:%v\n", msg)
 		return
@@ -65,11 +56,11 @@ func (f *FsNews) text(msg string) {
 			"text": msg,
 		},
 	}
-	sendFsNews(f.fsUrl, info)
+	sendFsNews(url, info)
 	return
 }
 
-func (f *FsNews) richText(title, msg string) {
+func richText(url, title, msg string) {
 	if msg == "" {
 		log.Printf("FsNews rich text msg empty, msg:%v\n", msg)
 		return
@@ -101,7 +92,7 @@ func (f *FsNews) richText(title, msg string) {
 			},
 		},
 	}
-	sendFsNews(f.fsUrl, info)
+	sendFsNews(url, info)
 	return
 }
 

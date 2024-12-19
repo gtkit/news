@@ -1,4 +1,4 @@
-package news
+package fs
 
 // 自建应用 AccessToken 结构体
 type InternalApp struct {
@@ -16,8 +16,8 @@ type InternalAccessTokenResp struct {
 	Expire            int    `json:"expire"`
 }
 
-// 发送图片消息请求结构体
-type ImageMessageReq struct {
+// 发送消息请求结构体
+type MessageReq struct {
 	ReceiveID string `json:"receive_id"`
 	MsgType   string `json:"msg_type"`
 	Content   string `json:"content"`
@@ -28,8 +28,12 @@ type ImageInfo struct {
 	ImageKey string `json:"image_key"`
 }
 
-// 发送图片消息响应结构体
-type ImageMessageResp struct {
+type TextInfo struct {
+	Text string `json:"text"`
+}
+
+// 发送消息响应结构体
+type MessageResp struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 	Data struct {
