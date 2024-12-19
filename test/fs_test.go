@@ -45,7 +45,7 @@ func TestUploadImage(t *testing.T) {
 		t.Error("UploadImage error: ", err)
 	}
 	t.Logf("res: %+v", res)
-	if err := app.DownloadImage(ctx, res.Data.ImageKey, dstpath+filepath.Base(srcimg)); err != nil {
+	if err := app.DownloadImage(ctx, res.ImageKey(), dstpath+filepath.Base(srcimg)); err != nil {
 		t.Error("UploadImage error: ", err)
 	}
 }
@@ -63,7 +63,7 @@ func TestSendImageMsg(t *testing.T) {
 	}
 	t.Logf("res: %+v", img)
 
-	if err := app.SendImageMsg(ctx, "ou_1e3fc242928fa853dd2ed13b1db60bd3", img.Data.ImageKey); err != nil {
+	if err := app.SendImageMsg(ctx, "ou_1e3fc242928fa853dd2ed13b1db60bd3", img.ImageKey()); err != nil {
 		t.Error("SendImageMessage error: ", err)
 		return
 	}
