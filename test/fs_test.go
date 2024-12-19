@@ -19,8 +19,7 @@ var (
 )
 
 func TestFsWarnText(t *testing.T) {
-	// fsurl := "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
-	fsurl := "https://open.feishu.cn/open-apis/bot/v2/hook/92d3b20a-4660-472e-ab43-e280150c345e"
+	fsurl := "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
 	fs.NewWebHook(fsurl).Send("我的标题1")
 	fs.NewWebHook(fsurl).Send("我的标题2", "我的内容")
 }
