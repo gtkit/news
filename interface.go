@@ -4,11 +4,6 @@ import (
 	"context"
 )
 
-// webhook 消息推送接口
-type WebHookNewsInterface interface {
-	Send(...string)
-}
-
 // AppNews 应用消息推送接口
 type AppNewsInterface interface {
 	Expired() int
@@ -21,4 +16,9 @@ type AppNewsInterface interface {
 // UploadImageInfo 上传图片返回信息
 type ImageKeyer interface {
 	ImageKey() string
+}
+
+type AppCacher interface {
+	Get() AppNewsInterface
+	Set(value AppNewsInterface)
 }

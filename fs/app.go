@@ -14,8 +14,13 @@ const (
 	AccessTokenApi = "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal"
 )
 
+func EmptyApp() *InternalApp {
+	return &InternalApp{}
+}
+
 // InternalApp 内部应用, 用于获取内部应用的 access token
-func NewInternalApp(ctx context.Context, appID, appSecret string) (news.AppNewsInterface, error) {
+// cacher 缓存器
+func NewInternalApp(ctx context.Context, appID, appSecret string, cache ...news.AppCacher) (news.AppNewsInterface, error) {
 	app := struct {
 		AppID     string `json:"app_id"`
 		AppSecret string `json:"app_secret"`
@@ -47,11 +52,17 @@ func NewInternalApp(ctx context.Context, appID, appSecret string) (news.AppNewsI
 		return nil, err
 	}
 
-	return &InternalApp{
+	internalapp := &InternalApp{
 		AppAccessToken:    result.AppAccessToken,
 		TenantAccessToken: result.TenantAccessToken,
 		Expire:            result.Expire,
-	}, nil
+	}
+	// 缓存 app
+	if len(cache) > 0 && cache[0] != nil {
+		cache[0].Set(internalapp)
+	}
+
+	return internalapp, nil
 }
 
 func (a *InternalApp) authTenantToken() string {

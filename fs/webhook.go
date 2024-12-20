@@ -5,42 +5,27 @@ import (
 	"log"
 	"net/http"
 	"strings"
-
-	"github.com/gtkit/news"
 )
-
-type FsNews struct {
-	fsUrl string
-}
-
-func NewWebHook(fsUrl string) news.WebHookNewsInterface {
-	if fsUrl == "" {
-		log.Printf("FsNew fsUrl empty, fsUrl:%v\n", fsUrl)
-		return nil
-	}
-	return &FsNews{
-		fsUrl: fsUrl,
-	}
-}
 
 type fsInfo struct {
 	MsgType string         `json:"msg_type"`
 	Content map[string]any `json:"content"`
 }
 
-func (f *FsNews) Send(args ...string) {
+// 发送飞书机器人webhook消息
+func WebHookNews(url string, args ...string) {
 	switch len(args) {
 	case 0:
 		log.Printf("rich text args length zero, args:%v\n", args)
 		return
 	case 1:
-		text(f.fsUrl, args[0])
+		text(url, args[0])
 		return
 	case 2:
-		richText(f.fsUrl, args[0], args[1])
+		richText(url, args[0], args[1])
 		return
 	default:
-		richText(f.fsUrl, args[0], args[1])
+		richText(url, args[0], args[1])
 		return
 	}
 }

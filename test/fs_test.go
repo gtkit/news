@@ -20,8 +20,8 @@ var (
 
 func TestFsWarnText(t *testing.T) {
 	fsurl := "https://open.feishu.cn/open-apis/bot/v2/hook/xxx"
-	fs.NewWebHook(fsurl).Send("我的标题1")
-	fs.NewWebHook(fsurl).Send("我的标题2", "我的内容")
+	fs.WebHookNews(fsurl, "我的标题1")
+	fs.WebHookNews(fsurl, "我的标题2", "我的内容")
 }
 
 func TestAccessToken(t *testing.T) {
