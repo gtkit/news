@@ -3,6 +3,7 @@ package fs
 import (
 	"bytes"
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/gtkit/json"
@@ -59,9 +60,9 @@ func NewInternalApp(ctx context.Context, appID, appSecret string, cache ...news.
 	}
 	// 缓存 app
 	if len(cache) > 0 && cache[0] != nil {
-		cache[0].Set(internalapp)
+		go cache[0].Set(internalapp)
 	}
-
+	log.Println("NewsApp successfully created")
 	return internalapp, nil
 }
 
