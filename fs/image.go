@@ -12,15 +12,13 @@ import (
 
 	"github.com/gtkit/json"
 	"github.com/pkg/errors"
-
-	"github.com/gtkit/news"
 )
 
 func (resp *UploadImageResp) ImageKey() string {
 	return resp.Data.ImageKey
 }
 
-func (a *InternalApp) UploadImage(ctx context.Context, path string) (news.ImageKeyer, error) {
+func (a *InternalApp) UploadImage(ctx context.Context, path string) (*UploadImageResp, error) {
 	api := "https://open.feishu.cn/open-apis/im/v1/images"
 
 	payload := &bytes.Buffer{}

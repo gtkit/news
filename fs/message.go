@@ -12,13 +12,19 @@ import (
 )
 
 const (
-	MsgAPI = "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=open_id"
+	FSMsgAPI = "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=open_id"
 )
 
 // 发送图片消息
-func (a *InternalApp) SendImageMsg(ctx context.Context, openID, imageKey string) error {
+func (a *InternalApp) SendImageMsg(ctx context.Context, openID, filepath string) error {
+	// 上传图片
+	upimg, err := a.UploadImage(ctx, filepath)
+	if err != nil {
+		return errors.WithMessage(err, "飞书 upload image failed")
+	}
+
 	img, _ := json.Marshal(ImageInfo{
-		ImageKey: imageKey,
+		ImageKey: upimg.ImageKey(),
 	})
 	msg := MessageReq{
 		ReceiveID: openID,
@@ -48,7 +54,7 @@ func (a *InternalApp) SendTextMsg(ctx context.Context, openID, msg string) error
 
 func doRequest(ctx context.Context, token string, payload []byte) error {
 	client := &http.Client{}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, MsgAPI, bytes.NewReader(payload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, FSMsgAPI, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,5 @@ import (
 func _() {
 	var (
 		_ news.AppNewsInterface = (*InternalApp)(nil)
-		_ news.ImageKeyer       = (*UploadImageResp)(nil)
 	)
 }
