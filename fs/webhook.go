@@ -17,6 +17,10 @@ type fsInfo struct {
 // 2. 发送富文本消息：WebHookSend(url, "标题", "正文", "提示", "超链接")
 func WebHookSend(url string, args ...string) {
 	var info *fsInfo
+	if url == "" {
+		log.Printf("FsNews url empty, url:%v\n", url)
+		return
+	}
 	switch len(args) {
 	case 0:
 		log.Printf("rich text args length zero, args:%v\n", args)
