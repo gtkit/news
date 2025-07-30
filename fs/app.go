@@ -15,7 +15,7 @@ const (
 	AccessTokenApi = "https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal"
 )
 
-func EmptyApp() news.AppNewsInterface {
+func EmptyApp() *InternalApp {
 	return &InternalApp{}
 }
 

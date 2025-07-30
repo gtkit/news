@@ -42,14 +42,14 @@ func main() {
 }
 
 // Cache implements news.AppCacher
-func (c *Cache) Get() news.AppNewsInterface {
+func (c *Cache) Get() news.AppNewser {
         // implement your cache logic here
 	
 	app := fs.EmptyApp()
 	
 	return app
 }
-func (c *Cache) Set(app news.AppNewsInterface) {
+func (c *Cache) Set(app news.AppNewser) {
 	// implement your cache logic here
 	return
 }

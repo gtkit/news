@@ -38,7 +38,6 @@ func (a *InternalApp) SendImageMsg(ctx context.Context, openID, filepath string)
 
 // 发送文本消息
 func (a *InternalApp) SendTextMsg(ctx context.Context, openID, msg string) error {
-	// todo: implement SendTextMessage
 	tm, _ := json.Marshal(TextInfo{
 		Text: msg,
 	})
