@@ -1,8 +1,10 @@
 package fs
 
 import (
+	"context"
 	"encoding/json"
-	"log"
+	"fmt"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -12,123 +14,119 @@ type fsInfo struct {
 	Content map[string]any `json:"content"`
 }
 
-// 发送飞书机器人webhook消息.
-// 1. 发送文本消息：WebHookSend(url, "hello world")
-// 2. 发送富文本消息：WebHookSend(url, "标题", "正文", "提示", "超链接")
-func WebHookSend(url string, args ...string) {
-	var info *fsInfo
-	if url == "" {
-		log.Printf("FsNews url empty, url:%v\n", url)
-		return
-	}
-	switch len(args) {
-	case 0:
-		log.Printf("rich text args length zero, args:%v\n", args)
-		return
-	case 1:
-		info = text(args[0])
-	case 2:
-		info = richText(args[0], args[1], "", "")
-	case 4:
-		info = richText(args[0], args[1], args[2], args[3])
-	default:
-		info = richText(args[0], args[1], args[2], args[3])
-
-	}
-	if info == nil {
-		return
-	}
-	sendFsNews(url, info)
+// WebHookSend 发送飞书机器人 webhook 消息.
+// 1. 发送文本消息：WebHookSend(url, "hello world").
+// 2. 发送富文本消息：WebHookSend(url, "标题", "正文", "提示", "超链接").
+func WebHookSend(url string, args ...string) error {
+	return WebHookSendCtx(context.Background(), url, args...)
 }
 
-// text：普通文本.
-func text(msg string) *fsInfo {
+// WebHookSendCtx 发送飞书机器人 webhook 消息（带 context）.
+func WebHookSendCtx(ctx context.Context, url string, args ...string) error {
+	if url == "" {
+		return fmt.Errorf("fs: webhook url is empty")
+	}
+
+	var info *fsInfo
+	switch len(args) {
+	case 0:
+		return fmt.Errorf("fs: webhook args is empty")
+	case 1:
+		info = textMsg(args[0])
+	case 2:
+		info = richTextMsg(args[0], args[1], "", "")
+	default:
+		tips, href := "", ""
+		if len(args) >= 3 {
+			tips = args[2]
+		}
+		if len(args) >= 4 {
+			href = args[3]
+		}
+		info = richTextMsg(args[0], args[1], tips, href)
+	}
+	if info == nil {
+		return fmt.Errorf("fs: build message failed")
+	}
+
+	return sendFsNews(ctx, url, info)
+}
+
+func textMsg(msg string) *fsInfo {
 	if msg == "" {
-		log.Printf("FsNews text msg empty, msg:%v\n", msg)
 		return nil
 	}
 	return &fsInfo{
 		MsgType: "text",
-		Content: map[string]any{
-			"text": msg,
-		},
+		Content: map[string]any{"text": msg},
 	}
 }
 
-// text：普通文本.
-// a：超链接.
-// at：@符号.
-// img：图.
-func richText(title, msg, tips, hyperlink string) *fsInfo {
+func richTextMsg(title, msg, tips, hyperlink string) *fsInfo {
 	if msg == "" {
-		log.Printf("FsNews rich text msg empty, msg:%v\n", msg)
 		return nil
 	}
-	if hyperlink == "" || tips == "" {
-		return &fsInfo{
-			MsgType: "post",
-			Content: map[string]any{
-				"post": map[string]any{
-					"zh_cn": map[string]any{
-						"title": title,
-						"content": []any{
-							[]map[string]any{
-								{
-									"tag":  "text",
-									"text": msg,
-								},
-								{
-									"tag":     "at",
-									"user_id": "all",
-								},
-							},
-						},
-					},
-				},
-			},
-		}
+
+	elements := []map[string]any{
+		{"tag": "text", "text": msg},
 	}
+	if hyperlink != "" && tips != "" {
+		elements = append(elements, map[string]any{
+			"tag": "a", "text": tips, "href": hyperlink,
+		})
+	}
+	elements = append(elements, map[string]any{
+		"tag": "at", "user_id": "all",
+	})
+
 	return &fsInfo{
 		MsgType: "post",
 		Content: map[string]any{
 			"post": map[string]any{
 				"zh_cn": map[string]any{
-					"title": title,
-					"content": []any{
-						[]map[string]any{
-							{
-								"tag":  "text",
-								"text": msg,
-							},
-							{
-								"tag":  "a",
-								"text": tips,
-								"href": hyperlink,
-							},
-							{
-								"tag":     "at",
-								"user_id": "all",
-							},
-						},
-					},
+					"title":   title,
+					"content": []any{elements},
 				},
 			},
 		},
 	}
 }
 
-func sendFsNews(fsUrl string, info *fsInfo) {
+func sendFsNews(ctx context.Context, fsURL string, info *fsInfo) error {
 	data, err := json.Marshal(info)
 	if err != nil {
-		log.Printf("sendFsNews marshal failed, err:%v\n", err)
-		return
+		return fmt.Errorf("fs: marshal webhook message: %w", err)
 	}
 
-	resp, err := http.Post(fsUrl, "application/json", strings.NewReader(string(data)))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fsURL, strings.NewReader(string(data)))
 	if err != nil {
-		log.Printf("sendFsNews post failed, err:%v\n", err)
-		return
+		return fmt.Errorf("fs: create webhook request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+
+	resp, err := defaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("fs: webhook request: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	const maxBody = 1 << 20
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxBody))
+	if err != nil {
+		return fmt.Errorf("fs: read webhook response: %w", err)
 	}
 
-	_ = resp.Body.Close()
+	var result struct {
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return fmt.Errorf("fs: decode webhook response: %w", err)
+	}
+
+	if result.Code != 0 {
+		return fmt.Errorf("fs: webhook api error: code=%d, msg=%s", result.Code, result.Msg)
+	}
+
+	return nil
 }

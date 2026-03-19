@@ -1,13 +1,13 @@
 package fs
 
-// 自建应用 AccessToken 结构体
+// InternalApp 自建应用 AccessToken 结构体.
 type InternalApp struct {
 	AppAccessToken    string `json:"app_access_token"`
 	TenantAccessToken string `json:"tenant_access_token"`
 	Expire            int    `json:"expire"`
 }
 
-// 自建应用 AccessToken 响应结构体
+// InternalAccessTokenResp 自建应用 AccessToken 响应结构体.
 type InternalAccessTokenResp struct {
 	Code              int    `json:"code"`
 	Msg               string `json:"msg"`
@@ -16,23 +16,25 @@ type InternalAccessTokenResp struct {
 	Expire            int    `json:"expire"`
 }
 
-// 发送消息请求结构体
+// MessageReq 发送消息请求结构体.
 type MessageReq struct {
 	ReceiveID string `json:"receive_id"`
 	MsgType   string `json:"msg_type"`
 	Content   string `json:"content"`
-	UUID      string `json:"uuid"`
+	UUID      string `json:"uuid,omitzero"`
 }
 
+// ImageInfo 图片信息.
 type ImageInfo struct {
 	ImageKey string `json:"image_key"`
 }
 
+// TextInfo 文本信息.
 type TextInfo struct {
 	Text string `json:"text"`
 }
 
-// 发送消息响应结构体
+// MessageResp 发送消息响应结构体.
 type MessageResp struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
@@ -56,6 +58,7 @@ type MessageResp struct {
 	} `json:"data"`
 }
 
+// UploadImageResp 上传图片响应结构体.
 type UploadImageResp struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
